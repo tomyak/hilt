@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from app.models.auth import LoginRequest, Token, User
 from app.core.security import (
     verify_password,
@@ -7,12 +7,14 @@ from app.core.security import (
 )
 from app.core.exceptions import InvalidCredentialsException
 from app.config import settings
+from app.core.rate_limit import limiter
 
 router = APIRouter()
 
 
 @router.post("/login", response_model=Token)
-async def login(login_request: LoginRequest):
+@limiter.limit("10/minute")
+async def login(request: Request, login_request: LoginRequest):
     """
     Login endpoint for UI operators.
     Returns JWT access token.

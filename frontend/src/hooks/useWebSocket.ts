@@ -3,7 +3,7 @@ import { useAuthStore } from '../stores/authStore';
 import { useRequestStore } from '../stores/requestStore';
 import type { WebSocketMessage, NewRequestMessage, RequestCancelledMessage } from '../stores/requestStore';
 
-const WS_URL = 'ws://localhost:8082/ws';
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8082/ws';
 const RECONNECT_INTERVAL = 3000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 

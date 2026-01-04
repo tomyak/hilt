@@ -1,7 +1,7 @@
 import uuid
 import time
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from app.schemas.openai import (
     OpenAIChatCompletionRequest,
@@ -21,17 +21,18 @@ from app.core.security import validate_api_key
 from app.services.request_manager import request_manager
 from app.services.websocket_manager import websocket_manager
 from app.config import settings
+from app.core.rate_limit import limiter
 
 router = APIRouter()
 
 
-def convert_openai_to_internal(request: OpenAIChatCompletionRequest, request_id: str) -> LLMRequest:
+def convert_openai_to_internal(openai_request: OpenAIChatCompletionRequest, request_id: str) -> LLMRequest:
     """Convert OpenAI request to internal format"""
     # Extract system message
     system_message = None
     messages = []
 
-    for msg in request.messages:
+    for msg in openai_request.messages:
         if msg.role == "system":
             system_message = msg.content
         else:
@@ -39,7 +40,7 @@ def convert_openai_to_internal(request: OpenAIChatCompletionRequest, request_id:
 
     # Convert tools
     tools = None
-    if request.tools:
+    if openai_request.tools:
         tools = [
             Tool(
                 type="function",
@@ -49,23 +50,23 @@ def convert_openai_to_internal(request: OpenAIChatCompletionRequest, request_id:
                     parameters=tool.function.parameters.dict()
                 )
             )
-            for tool in request.tools
+            for tool in openai_request.tools
         ]
 
     # Create internal request
     return LLMRequest(
         request_id=request_id,
         provider="openai",
-        model=request.model,
+        model=openai_request.model,
         messages=messages,
         system=system_message,
         tools=tools,
         parameters={
-            "temperature": request.temperature,
-            "top_p": request.top_p,
-            "max_tokens": request.max_tokens,
-            "presence_penalty": request.presence_penalty,
-            "frequency_penalty": request.frequency_penalty,
+            "temperature": openai_request.temperature,
+            "top_p": openai_request.top_p,
+            "max_tokens": openai_request.max_tokens,
+            "presence_penalty": openai_request.presence_penalty,
+            "frequency_penalty": openai_request.frequency_penalty,
         },
         timeout_at=datetime.utcnow() + timedelta(seconds=settings.REQUEST_TIMEOUT_SECONDS)
     )
@@ -118,8 +119,10 @@ def convert_internal_to_openai(response, request_id: str, model: str) -> OpenAIC
 
 
 @router.post("/chat/completions")
+@limiter.limit(f"{settings.RATE_LIMIT_PER_MINUTE}/minute")
 async def chat_completions(
-    request: OpenAIChatCompletionRequest,
+    request: Request,
+    openai_request: OpenAIChatCompletionRequest,
     api_key: str = Depends(validate_api_key)
 ):
     """
@@ -130,7 +133,7 @@ async def chat_completions(
     request_id = str(uuid.uuid4())
 
     # Convert to internal format
-    internal_request = convert_openai_to_internal(request, request_id)
+    internal_request = convert_openai_to_internal(openai_request, request_id)
 
     # Create request and get future
     future = await request_manager.create_request(internal_request)
@@ -139,9 +142,9 @@ async def chat_completions(
     await websocket_manager.broadcast_new_request(internal_request)
 
     # If streaming requested, return SSE stream
-    if request.stream:
+    if openai_request.stream:
         return StreamingResponse(
-            stream_openai_response(request_id, request.model),
+            stream_openai_response(request_id, openai_request.model),
             media_type="text/event-stream"
         )
 
@@ -152,7 +155,7 @@ async def chat_completions(
     )
 
     # Convert back to OpenAI format
-    openai_response = convert_internal_to_openai(response, request_id, request.model)
+    openai_response = convert_internal_to_openai(response, request_id, openai_request.model)
 
     return openai_response
 

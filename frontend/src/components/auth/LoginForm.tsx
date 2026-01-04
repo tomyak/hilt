@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 
-const API_URL = 'http://localhost:8082';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8082';
 
 export function LoginForm() {
   const [username, setUsername] = useState('');
@@ -84,9 +84,6 @@ export function LoginForm() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
-            <div className="text-xs text-muted-foreground text-center mt-4">
-              Default: admin / admin
-            </div>
           </form>
         </CardContent>
       </Card>
