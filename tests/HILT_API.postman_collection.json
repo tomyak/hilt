@@ -1,0 +1,226 @@
+{
+  "info": {
+    "name": "HILT API Tests",
+    "description": "Collection for testing HILT (Human-in-the-Loop LLM) API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8082/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8082",
+          "path": ["health"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chat Completions",
+      "item": [
+        {
+          "name": "Simple Chat (No Tools)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer hilt_sk_test123"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is 2+2?\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/v1/chat/completions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["v1", "chat", "completions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat with Weather Tool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer hilt_sk_test123"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is the weather in New York?\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"get_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"location\": {\n              \"type\": \"string\",\n              \"description\": \"The city and state, e.g. San Francisco, CA\"\n            },\n            \"unit\": {\n              \"type\": \"string\",\n              \"enum\": [\"celsius\", \"fahrenheit\"]\n            }\n          },\n          \"required\": [\"location\"]\n        }\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/v1/chat/completions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["v1", "chat", "completions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat with Multiple Tools",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer hilt_sk_test123"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"I need to book a flight from SF to NYC and check the weather there\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"book_flight\",\n        \"description\": \"Book a flight between two cities\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"origin\": {\n              \"type\": \"string\",\n              \"description\": \"Origin city\"\n            },\n            \"destination\": {\n              \"type\": \"string\",\n              \"description\": \"Destination city\"\n            },\n            \"date\": {\n              \"type\": \"string\",\n              \"description\": \"Departure date (YYYY-MM-DD)\"\n            }\n          },\n          \"required\": [\"origin\", \"destination\", \"date\"]\n        }\n      }\n    },\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"get_weather\",\n        \"description\": \"Get weather for a location\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"location\": {\n              \"type\": \"string\",\n              \"description\": \"City name\"\n            }\n          },\n          \"required\": [\"location\"]\n        }\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/v1/chat/completions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["v1", "chat", "completions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat with SQL Tool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer hilt_sk_test123"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Show me all users created in the last 7 days\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"execute_sql\",\n        \"description\": \"Execute a SQL query on the database\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"query\": {\n              \"type\": \"string\",\n              \"description\": \"The SQL query to execute\"\n            }\n          },\n          \"required\": [\"query\"]\n        }\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/v1/chat/completions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["v1", "chat", "completions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat with File Operations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer hilt_sk_test123"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"claude-3-opus\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Delete all log files older than 30 days\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"delete_files\",\n        \"description\": \"Delete files matching a pattern\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"pattern\": {\n              \"type\": \"string\",\n              \"description\": \"File pattern to match (e.g., *.log)\"\n            },\n            \"directory\": {\n              \"type\": \"string\",\n              \"description\": \"Directory to search in\"\n            },\n            \"older_than_days\": {\n              \"type\": \"integer\",\n              \"description\": \"Only delete files older than this many days\"\n            }\n          },\n          \"required\": [\"pattern\", \"directory\"]\n        }\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/v1/chat/completions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["v1", "chat", "completions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Chat with Email Tool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer hilt_sk_test123"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Send an email to the team about tomorrow's meeting\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"send_email\",\n        \"description\": \"Send an email to one or more recipients\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"to\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              },\n              \"description\": \"List of recipient email addresses\"\n            },\n            \"subject\": {\n              \"type\": \"string\",\n              \"description\": \"Email subject line\"\n            },\n            \"body\": {\n              \"type\": \"string\",\n              \"description\": \"Email body content\"\n            },\n            \"cc\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              },\n              \"description\": \"CC recipients\"\n            }\n          },\n          \"required\": [\"to\", \"subject\", \"body\"]\n        }\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/v1/chat/completions",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["v1", "chat", "completions"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

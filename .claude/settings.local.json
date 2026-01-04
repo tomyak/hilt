@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source .venv/bin/activate)",
+      "Bash(pip install:*)",
+      "Bash(python3:*)",
+      "Bash(uvicorn:*)",
+      "Bash(cat:*)",
+      "Bash(timeout 3 uvicorn:*)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm ls:*)",
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__list_console_messages",
+      "mcp__chrome-devtools__take_screenshot",
+      "mcp__chrome-devtools__get_console_message",
+      "mcp__chrome-devtools__list_network_requests",
+      "mcp__chrome-devtools__get_network_request",
+      "Bash(npx tsc:*)",
+      "Bash(bash -c \"cd frontend && npx tsc --noEmit 2>&1 | head -100\")",
+      "mcp__chrome-devtools__navigate_page",
+      "Bash(chmod:*)",
+      "Bash(xattr:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(find:*)",
+      "mcp__chrome-devtools__click",
+      "mcp__chrome-devtools__press_key",
+      "mcp__chrome-devtools__fill",
+      "Bash(python -m uvicorn:*)",
+      "mcp__chrome-devtools__fill_form",
+      "mcp__chrome-devtools__evaluate_script",
+      "mcp__chrome-devtools__wait_for"
+    ]
+  }
+}
