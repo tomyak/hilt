@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     # CORS (comma-separated string)
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
 
+    # Rate limiting
+    RATE_LIMIT_PER_MINUTE: int = 60
+
+    # Request size limit (in bytes, default 10MB)
+    MAX_REQUEST_SIZE: int = 10 * 1024 * 1024
+
     class Config:
         env_file = ".env"
         case_sensitive = True
