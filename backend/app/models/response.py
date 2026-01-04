@@ -18,7 +18,7 @@ class ToolCall(BaseModel):
 class LLMResponse(BaseModel):
     """Internal LLM response format"""
     request_id: str
-    content: str
+    content: Optional[str] = None
     tool_calls: Optional[List[ToolCall]] = None
     finish_reason: Literal["stop", "tool_calls", "length"] = "stop"
 
